@@ -1,0 +1,55 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Public product catalog. Anyone (even signed-out visitors) can browse.
+    // Only the admin can add/edit/delete products.
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+
+      // Exact stock numbers live here — never exposed to customers,
+      // only to the signed-in admin. The public product doc only carries
+      // an availability flag per variant (see admin.html).
+      match /private/{doc} {
+        allow read, write: if isAdmin();
+      }
+    }
+
+    // Each customer's own profile (name/phone/address for checkout prefill).
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+    }
+
+    // Marks which uids are store admins. The app never writes here —
+    // you add an admin by creating a document by hand in the Firebase
+    // console (Firestore → admins → Add document, doc ID = that user's UID).
+    match /admins/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow write: if false;
+    }
+
+    // Orders. A customer can create their own order and read only their
+    // own orders — never anyone else's. Only the admin can change status
+    // or delete an order.
+    match /orders/{orderId} {
+      allow create: if isSignedIn()
+        && request.resource.data.customerId == request.auth.uid
+        && request.resource.data.status == 'قيد المراجعة';
+      allow read: if isSignedIn()
+        && (resource.data.customerId == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin();
+    }
+  }
+}

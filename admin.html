@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>لوحة تحكم FARFETCHEG</title>
+<meta name="theme-color" content="#14140F">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14140F; --paper:#F6F3EC; --surface:#FFFFFF;
+    --accent:#C81E3A; --accent-dark:#96182C;
+    --line:#E4DFD2; --muted:#83786A;
+    --ok:#3D7A4E; --warn:#B4791F; --bad:#C81E3A;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;min-height:100%;}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:'IBM Plex Sans Arabic',-apple-system,sans-serif;
+    display:flex; flex-direction:column; min-height:100vh;
+  }
+  button{font-family:inherit; cursor:pointer; border:none; background:none;}
+  input,select,textarea{font-family:inherit;}
+  a{color:inherit; text-decoration:none;}
+  .tabular{font-variant-numeric:tabular-nums;}
+  img{max-width:100%; display:block;}
+  svg{width:18px; height:18px; flex-shrink:0; display:inline-block; vertical-align:middle;}
+
+  /* ---- Header / nav ---- */
+  #header{background:var(--ink); color:var(--paper); position:sticky; top:0; z-index:30; border-bottom:3px solid var(--accent);}
+  .header-inner{max-width:1200px; margin:0 auto; padding:12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px;}
+  .wordmark{font-weight:800; font-size:19px; letter-spacing:.02em; display:flex; align-items:center; gap:7px;}
+  .wordmark .dot{color:var(--accent);}
+  .admin-badge{background:var(--accent); color:#fff; font-size:10.5px; font-weight:800; padding:2px 8px; border-radius:20px; letter-spacing:.03em;}
+  .tabs{display:flex; gap:4px; max-width:1200px; margin:0 auto; padding:0 18px; overflow-x:auto;}
+  .tab-btn{padding:11px 14px; font-weight:700; font-size:13.5px; color:var(--muted); border-bottom:3px solid transparent; white-space:nowrap; display:flex; align-items:center; gap:6px;}
+  .tab-btn.active{color:var(--ink); border-color:var(--accent);}
+  .tab-btn .count{background:var(--line); color:var(--ink); font-size:10.5px; font-weight:800; padding:1px 6px; border-radius:10px;}
+  #tabs-bar{background:var(--surface); border-bottom:1px solid var(--line);}
+
+  #main{flex:1; width:100%;}
+  .wrap{max-width:1200px; margin:0 auto; padding:18px 18px 60px;}
+  .wrap-narrow{max-width:480px; margin:0 auto; padding:18px 18px 60px;}
+
+  .section-title{font-size:19px; font-weight:800; margin:0 0 14px; display:flex; align-items:center; gap:10px;}
+  .section-title::after{content:''; flex:1; height:1px; background:var(--line);}
+  .space-between{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .row{display:flex; gap:8px;}
+  .row-center{display:flex; align-items:center; gap:8px;}
+  .stack{display:flex; flex-direction:column; gap:10px;}
+
+  /* ---- Buttons ---- */
+  .btn-primary{background:var(--accent); color:#fff; font-weight:700; padding:12px 18px; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; gap:8px; font-size:14px;}
+  .btn-primary:disabled{opacity:.4;}
+  .btn-primary:active{opacity:.88;}
+  .btn-secondary{background:var(--surface); color:var(--ink); border:1.5px solid var(--ink); font-weight:700; padding:10px 16px; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; gap:8px; font-size:13.5px;}
+  .btn-ghost{background:none; color:var(--muted); font-weight:600; font-size:13px; padding:8px;}
+  .btn-danger{background:none; color:var(--accent); font-weight:700; font-size:13px; padding:8px;}
+  .icon-sq-btn{width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; background:var(--paper); color:var(--ink); border:1px solid var(--line);}
+  .icon-sq-btn:active{background:var(--line);}
+
+  /* ---- Cards / fields ---- */
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:14px;}
+  .field-label{font-size:12px; color:var(--muted); font-weight:700; display:block; margin-bottom:5px;}
+  input.text-field, select.text-field, textarea.text-field{
+    width:100%; background:var(--paper); border:1.5px solid var(--line); border-radius:10px;
+    padding:10px 12px; font-size:14px; outline:none; color:var(--ink);
+  }
+  input.text-field:focus, select.text-field:focus, textarea.text-field:focus{border-color:var(--ink);}
+  textarea.text-field{resize:vertical; min-height:64px;}
+  input[type=color].text-field{padding:3px; height:38px; width:46px; flex-shrink:0;}
+  input[type=number].text-field{-moz-appearance:textfield;}
+
+  /* ---- Login gate ---- */
+  .login-hero{padding:52px 0 16px; text-align:center;}
+  .login-hero .wordmark{justify-content:center; font-size:26px; margin-bottom:6px;}
+  .login-hero p{color:var(--muted); font-size:13.5px;}
+  .auth-error{color:var(--accent); font-size:12.5px; font-weight:600;}
+  .link-btn{color:var(--accent); font-weight:700; font-size:13px;}
+  .not-admin-box{background:var(--surface); border:1.5px dashed var(--accent); border-radius:16px; padding:22px; text-align:center;}
+  .uid-chip{background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:12px; font-family:monospace; direction:ltr; text-align:center; margin:10px 0; word-break:break-all;}
+
+  /* ---- Product list ---- */
+  .product-row{display:flex; gap:12px; align-items:center; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:10px; }
+  .product-row-img{width:56px; height:56px; border-radius:10px; overflow:hidden; background:#EDE9DE; flex-shrink:0; display:flex; align-items:center; justify-content:center;}
+  .product-row-img img{width:100%; height:100%; object-fit:cover;}
+  .product-row-name{font-weight:700; font-size:14px;}
+  .product-row-meta{font-size:12px; color:var(--muted); margin-top:2px;}
+  .badge{display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:800; padding:3px 9px; border-radius:20px;}
+  .badge-ok{background:#E4F0E6; color:var(--ok);}
+  .badge-bad{background:#F5E1E1; color:var(--accent-dark);}
+  .badge-warn{background:#F7EAD3; color:var(--warn);}
+
+  /* ---- Variant editor ---- */
+  .variant-row{display:grid; grid-template-columns:1fr 1fr 46px 90px 34px; gap:6px; align-items:center;}
+  @media(max-width:560px){ .variant-row{grid-template-columns:1fr 1fr 40px 74px 30px;} }
+  .variant-head{font-size:11px; color:var(--muted); font-weight:700;}
+  .img-url-row{display:flex; gap:6px; align-items:center;}
+
+  /* ---- Orders ---- */
+  .order-admin-card{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:14px;}
+  .order-items-list{font-size:12.5px; color:var(--muted); line-height:1.8; margin:8px 0;}
+  .status-actions{display:flex; gap:6px; flex-wrap:wrap; margin-top:10px;}
+  .status-pill-btn{font-size:12px; font-weight:700; padding:7px 12px; border-radius:20px; background:var(--paper); border:1.5px solid var(--line); color:var(--muted);}
+  .status-pill-btn.current{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+  .filter-row{display:flex; gap:6px; overflow-x:auto; margin-bottom:14px; padding-bottom:2px;}
+  .filter-chip{font-size:12.5px; font-weight:700; padding:7px 13px; border-radius:20px; background:var(--surface); border:1.5px solid var(--line); color:var(--muted); white-space:nowrap;}
+  .filter-chip.active{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+
+  /* ---- Inventory ---- */
+  .inv-table{width:100%; border-collapse:collapse; font-size:13px;}
+  .inv-table th{text-align:right; font-size:11px; color:var(--muted); font-weight:700; padding:8px 6px; border-bottom:1px solid var(--line);}
+  .inv-table td{padding:8px 6px; border-bottom:1px solid var(--line); vertical-align:middle;}
+  .inv-qty-stepper{display:inline-flex; align-items:center; gap:6px; background:var(--paper); border:1px solid var(--line); border-radius:9px; padding:3px 6px;}
+  .inv-qty-stepper button{width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px;}
+  .low-stock{color:var(--accent-dark); font-weight:800;}
+
+  .empty{background:var(--surface); border:1.5px dashed var(--line); border-radius:16px; padding:40px 16px; text-align:center;}
+  .empty svg{width:30px; height:30px; color:#C9C2AE; margin-bottom:8px;}
+  .empty-title{font-weight:700; font-size:15px;}
+  .empty-sub{font-size:12.5px; color:var(--muted); margin-top:4px;}
+
+  .toast{position:fixed; bottom:18px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; padding:11px 18px; border-radius:30px; font-size:13px; font-weight:600; z-index:100; box-shadow:0 8px 24px rgba(0,0,0,.2); display:flex; align-items:center; gap:8px;}
+  .toast.error{background:var(--accent);}
+  .spinner-spin{animation:spin 1s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .modal-overlay{position:fixed; inset:0; background:rgba(20,20,15,.55); z-index:50; display:flex; align-items:center; justify-content:center; padding:16px;}
+  .modal-sheet{background:var(--surface); width:100%; max-width:420px; border-radius:18px; max-height:88vh; display:flex; flex-direction:column; overflow:hidden;}
+  .modal-head{display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid var(--line);}
+  .modal-title{font-weight:800; font-size:15px;}
+  .modal-body{padding:16px; overflow-y:auto;}
+  .close-btn{width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--muted);}
+</style>
+</head>
+<body>
+  <div id="header"></div>
+  <div id="tabs-bar"></div>
+  <main id="main"></main>
+  <div id="modal-root"></div>
+  <div id="toast-container"></div>
+
+<script type="module">
+import {
+  auth, db,
+  createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged,
+  collection, doc, addDoc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, onSnapshot, serverTimestamp,
+} from './firebase-init.js';
+
+const ICONS = {
+  bag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>',
+  minus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>',
+  package:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.73Z"/><path d="M3.3 7 12 12l8.7-5"/><path d="M12 22V12"/></svg>',
+  alert:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>',
+  logout:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>',
+  boxes:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19.5l4-2.34"/><path d="m8 5 4-2.5 4 2.5M8 5v4.5"/><path d="M2 14 12 8l10 6"/><path d="m8 15 4 2.4 4-2.4M12 8v11.5"/></svg>',
+  spinner:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-9-9" opacity="0.9"/></svg>',
+  list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>',
+};
+
+const ORDER_STATUSES = ['قيد المراجعة','قيد التجهيز','تم الشحن','تم التسليم'];
+const CANCELLED = 'ملغي';
+const LOW_STOCK_THRESHOLD = 3;
+
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function money(n){
+  n = Math.round((n + Number.EPSILON) * 100) / 100;
+  return n.toLocaleString('ar-EG', { minimumFractionDigits:0, maximumFractionDigits:2 });
+}
+function escapeHtml(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function variantKey(size, color){ return size + '__' + color; }
+
+const state = {
+  view: 'login',          // login | products | productEditor | orders | inventory | forbidden
+  activeTab: 'products',
+  user: null,
+  adminChecked: false,
+  isAdmin: false,
+  authMode: 'login',
+  authError: '',
+  authBusy: false,
+
+  products: [],
+  productsLoaded: false,
+  stockByProduct: {},     // { [productId]: { "size__color": qty } }
+
+  editingProduct: null,   // draft object while adding/editing a product
+
+  orders: [],
+  ordersLoaded: false,
+  ordersUnsub: null,
+  orderStatusFilter: 'all',
+
+  toast: null,
+};
+
+function toast(msg, type){
+  state.toast = { msg, type: type || 'ok' };
+  render();
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=>{ state.toast = null; render(); }, 2600);
+}
+
+/* ================= SHELL / RENDER ================= */
+function render(){
+  document.getElementById('header').innerHTML = renderHeader();
+  document.getElementById('tabs-bar').innerHTML = renderTabs();
+  document.getElementById('main').innerHTML = renderView();
+  document.getElementById('modal-root').innerHTML = renderModal();
+  document.getElementById('toast-container').innerHTML = state.toast
+    ? ('<div class="toast ' + (state.toast.type==='error'?'error':'') + '">' + (state.toast.type==='error'?ICONS.alert:ICONS.check) + escapeHtml(state.toast.msg) + '</div>') : '';
+}
+
+function renderHeader(){
+  return '<div class="header-inner">' +
+    '<div class="wordmark">' + ICONS.boxes + '<span>.FARFETCHEG</span><span class="admin-badge">ADMIN</span></div>' +
+    (state.user && state.isAdmin ? '<button class="btn-ghost" style="color:var(--paper);display:flex;align-items:center;gap:4px;" onclick="doLogout()">' + ICONS.logout + ' خروج</button>' : '') +
+  '</div>';
+}
+
+function renderTabs(){
+  if(!(state.user && state.isAdmin)) return '';
+  const tabs = [
+    { id:'products', label:'المنتجات', icon:ICONS.bag, count:state.products.length },
+    { id:'orders', label:'الطلبات', icon:ICONS.list, count:state.orders.filter(o=>o.status==='قيد المراجعة').length },
+    { id:'inventory', label:'المخزون', icon:ICONS.boxes, count:null },
+  ];
+  return '<div class="tabs">' + tabs.map(t =>
+    '<button class="tab-btn ' + (state.activeTab===t.id?'active':'') + '" onclick="setTab(\'' + t.id + '\')">' + t.icon + t.label +
+    (t.count ? ('<span class="count">' + t.count + '</span>') : '') + '</button>'
+  ).join('') + '</div>';
+}
+
+function setTab(id){
+  state.activeTab = id;
+  state.view = id;
+  if(id === 'inventory') loadAllStock();
+  render();
+}
+
+function renderView(){
+  if(!state.user) return renderAuthScreen();
+  if(!state.adminChecked) return '<div class="wrap" style="text-align:center;padding:60px 0;color:var(--muted);">' + ICONS.spinner + '<div style="margin-top:8px;">جاري التحقق من الصلاحيات…</div></div>';
+  if(!state.isAdmin) return renderForbidden();
+  if(state.view === 'productEditor') return renderProductEditor();
+  if(state.activeTab === 'orders') return renderOrders();
+  if(state.activeTab === 'inventory') return renderInventory();
+  return renderProducts();
+}
+
+/* ================= AUTH ================= */
+function renderAuthScreen(){
+  const isLogin = state.authMode === 'login';
+  return '<div class="wrap-narrow">' +
+    '<div class="login-hero"><div class="wordmark">' + ICONS.boxes + '<span>.FARFETCHEG</span></div><p>لوحة تحكم التاجر — مش لوحة العملاء</p></div>' +
+    '<div class="card stack">' +
+      (!isLogin ? '<div><span class="field-label">الاسم</span><input class="text-field" id="auth-name" data-autofocus></div>' : '') +
+      '<div><span class="field-label">البريد الإلكتروني</span><input class="text-field" id="auth-email" type="email" ' + (isLogin?'data-autofocus':'') + '></div>' +
+      '<div><span class="field-label">كلمة السر</span><input class="text-field" id="auth-password" type="password"></div>' +
+      (state.authError ? ('<div class="auth-error">' + escapeHtml(state.authError) + '</div>') : '') +
+      '<button class="btn-primary" style="width:100%;" ' + (state.authBusy?'disabled':'') + ' onclick="submitAuth()">' + (state.authBusy ? 'جاري التحميل…' : (isLogin ? 'دخول' : 'إنشاء حساب')) + '</button>' +
+      '<button class="link-btn" style="text-align:center;" onclick="switchAuthMode()">' + (isLogin ? 'أول مرة تدخل الأدمن؟ اعمل حساب' : 'عندك حساب أدمن؟ سجل دخولك') + '</button>' +
+    '</div>' +
+  '</div>';
+}
+function switchAuthMode(){ state.authMode = state.authMode==='login' ? 'signup' : 'login'; state.authError=''; render(); }
+async function submitAuth(){
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const isLogin = state.authMode === 'login';
+  if(!email || !password){ state.authError = 'كمّل البيانات الأول'; render(); return; }
+  state.authBusy = true; state.authError=''; render();
+  try{
+    if(isLogin){
+      await signInWithEmailAndPassword(auth, email, password);
+    } else {
+      await createUserWithEmailAndPassword(auth, email, password);
+    }
+  }catch(err){
+    state.authError = authErrorMessage(err);
+  }
+  state.authBusy = false;
+  render();
+}
+function authErrorMessage(err){
+  const code = err && err.code || '';
+  if(code.includes('email-already-in-use')) return 'الإيميل ده متسجل قبل كده';
+  if(code.includes('invalid-credential') || code.includes('wrong-password') || code.includes('user-not-found')) return 'الإيميل أو كلمة السر غلط';
+  if(code.includes('weak-password')) return 'كلمة السر لازم تكون ٦ حروف على الأقل';
+  if(code.includes('invalid-email')) return 'الإيميل مش صحيح';
+  return 'حصل خطأ، حاول تاني';
+}
+async function doLogout(){
+  if(state.ordersUnsub){ state.ordersUnsub(); state.ordersUnsub = null; }
+  await signOut(auth);
+  toast('اتسجل خروجك');
+}
+
+function renderForbidden(){
+  return '<div class="wrap-narrow" style="padding-top:60px;">' +
+    '<div class="not-admin-box">' + ICONS.alert +
+      '<div class="empty-title" style="margin-top:8px;">الحساب ده مش أدمن</div>' +
+      '<div class="empty-sub">لازم تضيف الـ UID بتاعك يدوي في Firebase Console داخل مجموعة admins عشان تقدر تدخل هنا.</div>' +
+      '<div class="uid-chip">' + escapeHtml(state.user.uid) + '</div>' +
+      '<button class="btn-secondary" style="margin-top:6px;" onclick="doLogout()">' + ICONS.logout + ' خروج</button>' +
+    '</div>' +
+  '</div>';
+}
+
+/* ================= PRODUCTS LIST ================= */
+function renderProducts(){
+  let body;
+  if(!state.productsLoaded){
+    body = '<div style="text-align:center;padding:40px 0;color:var(--muted);">جاري التحميل…</div>';
+  } else if(state.products.length===0){
+    body = '<div class="empty">' + ICONS.bag + '<div class="empty-title">لسه مفيش منتجات</div><div class="empty-sub">دوس "منتج جديد" وابدأ تضيف تصاميمك</div></div>';
+  } else {
+    body = '<div class="stack">' + state.products.map(renderProductRow).join('') + '</div>';
+  }
+  return '<div class="wrap">' +
+    '<div class="space-between" style="margin-bottom:14px;">' +
+      '<div class="section-title" style="margin:0;flex:1;">المنتجات</div>' +
+      '<button class="btn-primary" onclick="openProductEditor(null)">' + ICONS.plus + ' منتج جديد</button>' +
+    '</div>' + body +
+  '</div>';
+}
+function renderProductRow(p){
+  const totalVariants = (p.variants||[]).length;
+  const availableCount = (p.variants||[]).filter(v=>v.status==='available').length;
+  return '<div class="product-row">' +
+    '<div class="product-row-img">' + (p.images && p.images[0] ? ('<img src="' + escapeHtml(p.images[0]) + '">') : ICONS.bag) + '</div>' +
+    '<div style="flex:1;min-width:0;">' +
+      '<div class="product-row-name">' + escapeHtml(p.name) + '</div>' +
+      '<div class="product-row-meta">' + money(p.price) + ' جنيه · ' + availableCount + '/' + totalVariants + ' متغيّر متاح</div>' +
+    '</div>' +
+    '<button class="icon-sq-btn" onclick="openProductEditor(\'' + p.id + '\')">' + ICONS.edit + '</button>' +
+    '<button class="icon-sq-btn" onclick="confirmDeleteProduct(\'' + p.id + '\')">' + ICONS.trash + '</button>' +
+  '</div>';
+}
+
+/* ================= PRODUCT EDITOR ================= */
+function openProductEditor(id){
+  if(id){
+    const p = state.products.find(p=>p.id===id);
+    if(!p){ toast('المنتج مش موجود', 'error'); return; }
+    const stock = state.stockByProduct[id] || {};
+    state.editingProduct = {
+      id: p.id,
+      name: p.name || '',
+      description: p.description || '',
+      price: p.price || 0,
+      imageUrls: (p.images && p.images.length ? p.images.slice() : ['']),
+      variants: (p.variants||[]).map(v => ({
+        size: v.size, color: v.color, colorHex: v.colorHex || '#14140F',
+        qty: stock[variantKey(v.size, v.color)] != null ? stock[variantKey(v.size, v.color)] : 0,
+      })),
+    };
+    // lazily fetch fresh stock in case it wasn't preloaded yet
+    if(!state.stockByProduct[id]) loadStockForProduct(id).then(()=>{
+      if(state.editingProduct && state.editingProduct.id===id){
+        const fresh = state.stockByProduct[id] || {};
+        state.editingProduct.variants.forEach(v => { v.qty = fresh[variantKey(v.size,v.color)] || 0; });
+        render();
+      }
+    });
+  } else {
+    state.editingProduct = {
+      id: null, name:'', description:'', price:0, imageUrls:[''],
+      variants: [{ size:'M', color:'أسود', colorHex:'#14140F', qty:0 }],
+    };
+  }
+  state.view = 'productEditor';
+  render();
+}
+function closeProductEditor(){
+  state.editingProduct = null;
+  state.view = state.activeTab;
+  render();
+}
+function updateDraftField(field, value){
+  if(!state.editingProduct) return;
+  state.editingProduct[field] = field==='price' ? (parseFloat(value)||0) : value;
+}
+function updateImageUrl(i, value){
+  state.editingProduct.imageUrls[i] = value;
+}
+function addImageUrlRow(){ state.editingProduct.imageUrls.push(''); render(); }
+function removeImageUrlRow(i){ state.editingProduct.imageUrls.splice(i,1); if(state.editingProduct.imageUrls.length===0) state.editingProduct.imageUrls.push(''); render(); }
+
+function addVariantRow(){
+  state.editingProduct.variants.push({ size:'', color:'', colorHex:'#14140F', qty:0 });
+  render();
+}
+function removeVariantRow(i){ state.editingProduct.variants.splice(i,1); render(); }
+function updateVariantField(i, field, value){
+  const v = state.editingProduct.variants[i];
+  if(field==='qty') v.qty = Math.max(0, parseInt(value)||0);
+  else v[field] = value;
+}
+
+function renderProductEditor(){
+  const d = state.editingProduct;
+  if(!d) return '';
+  const isNew = !d.id;
+  return '<div class="wrap-narrow">' +
+    '<button class="btn-ghost" style="padding:0 0 10px;" onclick="closeProductEditor()">' + ICONS.x + ' رجوع</button>' +
+    '<div class="section-title" style="margin-top:0;">' + (isNew ? 'منتج جديد' : 'تعديل المنتج') + '</div>' +
+    '<div class="card stack">' +
+      '<div><span class="field-label">اسم المنتج</span><input class="text-field" value="' + escapeHtml(d.name) + '" oninput="updateDraftField(\'name\', this.value)"></div>' +
+      '<div><span class="field-label">الوصف</span><textarea class="text-field" oninput="updateDraftField(\'description\', this.value)">' + escapeHtml(d.description) + '</textarea></div>' +
+      '<div><span class="field-label">السعر (جنيه)</span><input class="text-field" type="number" min="0" value="' + d.price + '" oninput="updateDraftField(\'price\', this.value)"></div>' +
+    '</div>' +
+
+    '<div class="section-title">الصور (روابط)</div>' +
+    '<div class="stack">' +
+      d.imageUrls.map((url,i) =>
+        '<div class="img-url-row">' +
+          '<input class="text-field" placeholder="https://…" value="' + escapeHtml(url) + '" oninput="updateImageUrl(' + i + ', this.value)">' +
+          '<button class="icon-sq-btn" onclick="removeImageUrlRow(' + i + ')">' + ICONS.x + '</button>' +
+        '</div>'
+      ).join('') +
+      '<button class="btn-secondary" onclick="addImageUrlRow()">' + ICONS.plus + ' إضافة صورة</button>' +
+    '</div>' +
+
+    '<div class="section-title">المقاسات والألوان والمخزون</div>' +
+    '<div class="card stack">' +
+      '<div class="variant-row">' +
+        '<span class="variant-head">المقاس</span><span class="variant-head">اللون</span><span class="variant-head"></span><span class="variant-head">الكمية</span><span></span>' +
+      '</div>' +
+      d.variants.map((v,i) =>
+        '<div class="variant-row">' +
+          '<input class="text-field" placeholder="M / L / XL" value="' + escapeHtml(v.size) + '" oninput="updateVariantField(' + i + ', \'size\', this.value)">' +
+          '<input class="text-field" placeholder="أسود" value="' + escapeHtml(v.color) + '" oninput="updateVariantField(' + i + ', \'color\', this.value)">' +
+          '<input class="text-field" type="color" value="' + escapeHtml(v.colorHex) + '" oninput="updateVariantField(' + i + ', \'colorHex\', this.value)">' +
+          '<input class="text-field" type="number" min="0" value="' + v.qty + '" oninput="updateVariantField(' + i + ', \'qty\', this.value)">' +
+          '<button class="icon-sq-btn" onclick="removeVariantRow(' + i + ')">' + ICONS.trash + '</button>' +
+        '</div>'
+      ).join('') +
+      '<button class="btn-secondary" onclick="addVariantRow()">' + ICONS.plus + ' إضافة متغيّر</button>' +
+      '<div class="empty-sub">الكمية صفر = هيظهر للعميل "غير متوفر" تلقائي. العميل مش بيشوف الرقم ده خالص، بس بيشوف "متوفر" أو "غير متوفر".</div>' +
+    '</div>' +
+
+    '<button class="btn-primary" style="width:100%;margin-top:16px;" onclick="saveProduct()">' + ICONS.check + ' حفظ المنتج</button>' +
+  '</div>';
+}
+
+async function saveProduct(){
+  const d = state.editingProduct;
+  if(!d.name.trim()){ toast('اكتب اسم المنتج', 'error'); return; }
+  if(!d.price || d.price<=0){ toast('حط سعر صحيح', 'error'); return; }
+  const validVariants = d.variants.filter(v => v.size.trim() && v.color.trim());
+  if(validVariants.length===0){ toast('ضيف مقاس ولون واحد على الأقل', 'error'); return; }
+  const images = d.imageUrls.map(u=>u.trim()).filter(Boolean);
+
+  const publicData = {
+    name: d.name.trim(),
+    description: d.description.trim(),
+    price: d.price,
+    images,
+    variants: validVariants.map(v => ({
+      size: v.size.trim(), color: v.color.trim(), colorHex: v.colorHex,
+      status: v.qty > 0 ? 'available' : 'unavailable',
+    })),
+    updatedAt: serverTimestamp(),
+  };
+  const stockMap = {};
+  validVariants.forEach(v => { stockMap[variantKey(v.size.trim(), v.color.trim())] = v.qty; });
+
+  try{
+    let id = d.id;
+    if(id){
+      await setDoc(doc(db, 'products', id), publicData);
+    } else {
+      const ref = await addDoc(collection(db, 'products'), publicData);
+      id = ref.id;
+    }
+    await setDoc(doc(db, 'products', id, 'private', 'stock'), { qty: stockMap });
+    state.stockByProduct[id] = stockMap;
+    toast('اتحفظ المنتج بنجاح');
+    closeProductEditor();
+  }catch(err){
+    toast('حصل خطأ وإحنا بنحفظ، حاول تاني', 'error');
+  }
+}
+
+function confirmDeleteProduct(id){
+  state.modal = { type:'confirmDelete', productId:id };
+  render();
+}
+async function doDeleteProduct(id){
+  try{
+    await deleteDoc(doc(db, 'products', id, 'private', 'stock'));
+    await deleteDoc(doc(db, 'products', id));
+    delete state.stockByProduct[id];
+    toast('اتمسح المنتج');
+  }catch(err){
+    toast('حصل خطأ، حاول تاني', 'error');
+  }
+  state.modal = null;
+  render();
+}
+
+/* ================= ORDERS ================= */
+function renderOrders(){
+  if(!state.ordersLoaded){
+    return '<div class="wrap"><div style="text-align:center;padding:40px 0;color:var(--muted);">جاري تحميل الطلبات…</div></div>';
+  }
+  const filters = [{id:'all',label:'الكل'}, ...ORDER_STATUSES.map(s=>({id:s,label:s})), {id:CANCELLED,label:CANCELLED}];
+  const filtered = state.orderStatusFilter==='all' ? state.orders : state.orders.filter(o=>o.status===state.orderStatusFilter);
+  let body;
+  if(filtered.length===0){
+    body = '<div class="empty">' + ICONS.list + '<div class="empty-title">مفيش طلبات هنا</div></div>';
+  } else {
+    body = '<div class="stack">' + filtered.map(renderOrderAdminCard).join('') + '</div>';
+  }
+  return '<div class="wrap">' +
+    '<div class="section-title" style="margin-top:0;">الطلبات</div>' +
+    '<div class="filter-row">' + filters.map(f=>'<button class="filter-chip ' + (state.orderStatusFilter===f.id?'active':'') + '" onclick="setOrderFilter(\'' + f.id + '\')">' + escapeHtml(f.label) + '</button>').join('') + '</div>' +
+    body +
+  '</div>';
+}
+function setOrderFilter(id){ state.orderStatusFilter = id; render(); }
+function renderOrderAdminCard(o){
+  const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleString('ar-EG', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}) : '';
+  return '<div class="order-admin-card">' +
+    '<div class="space-between">' +
+      '<div><b>' + escapeHtml(o.customerName||'') + '</b><span style="color:var(--muted);font-size:12px;"> — ' + escapeHtml(o.customerPhone||'') + '</span></div>' +
+      '<span style="font-size:11.5px;color:var(--muted);">' + dateStr + '</span>' +
+    '</div>' +
+    '<div style="font-size:12.5px;color:var(--muted);margin-top:4px;">' + escapeHtml(o.address||'') + '، ' + escapeHtml(o.city||'') + '</div>' +
+    '<div class="order-items-list">' + (o.items||[]).map(i=>escapeHtml(i.name) + ' (' + escapeHtml(i.size) + '/' + escapeHtml(i.color) + ') ×' + i.qty).join('، ') + '</div>' +
+    '<div class="space-between">' +
+      '<span style="font-weight:800;font-size:15px;">' + money(o.total) + ' جنيه</span>' +
+      '<span style="font-size:12px;color:var(--muted);">' + (o.paymentMethod==='instapay' ? ('إنستاباي' + (o.paymentNote?(' · '+escapeHtml(o.paymentNote)):'')) : 'عند الاستلام') + '</span>' +
+    '</div>' +
+    (o.notes ? ('<div style="font-size:12px;color:var(--muted);margin-top:6px;"><b style="color:var(--ink);">ملاحظات:</b> ' + escapeHtml(o.notes) + '</div>') : '') +
+    '<div class="status-actions">' +
+      ORDER_STATUSES.map(s => '<button class="status-pill-btn ' + (o.status===s?'current':'') + '" onclick="changeOrderStatus(\'' + o.id + '\', \'' + s + '\')">' + escapeHtml(s) + '</button>').join('') +
+      '<button class="status-pill-btn ' + (o.status===CANCELLED?'current':'') + '" style="color:var(--accent);" onclick="changeOrderStatus(\'' + o.id + '\', \'' + CANCELLED + '\')">إلغاء</button>' +
+    '</div>' +
+  '</div>';
+}
+async function changeOrderStatus(id, status){
+  try{
+    await updateDoc(doc(db, 'orders', id), { status });
+    toast('اتحدثت حالة الطلب');
+  }catch(err){
+    toast('حصل خطأ، حاول تاني', 'error');
+  }
+}
+
+/* ================= INVENTORY ================= */
+async function loadStockForProduct(id){
+  try{
+    const snap = await getDoc(doc(db, 'products', id, 'private', 'stock'));
+    state.stockByProduct[id] = snap.exists() ? (snap.data().qty || {}) : {};
+  }catch(e){ state.stockByProduct[id] = {}; }
+}
+async function loadAllStock(){
+  await Promise.all(state.products.map(p => loadStockForProduct(p.id)));
+  render();
+}
+function renderInventory(){
+  if(!state.productsLoaded) return '<div class="wrap"><div style="text-align:center;padding:40px 0;color:var(--muted);">جاري التحميل…</div></div>';
+  if(state.products.length===0) return '<div class="wrap"><div class="empty">' + ICONS.boxes + '<div class="empty-title">لسه مفيش منتجات لتديرها</div></div></div>';
+
+  const rows = [];
+  state.products.forEach(p => {
+    const stock = state.stockByProduct[p.id] || {};
+    (p.variants||[]).forEach(v => {
+      const key = variantKey(v.size, v.color);
+      rows.push({ productId:p.id, productName:p.name, size:v.size, color:v.color, qty: stock[key]||0 });
+    });
+  });
+
+  return '<div class="wrap">' +
+    '<div class="section-title" style="margin-top:0;">المخزون</div>' +
+    '<div class="card" style="overflow-x:auto;padding:6px 10px;">' +
+      '<table class="inv-table">' +
+        '<thead><tr><th>المنتج</th><th>المقاس</th><th>اللون</th><th>الكمية</th></tr></thead>' +
+        '<tbody>' + rows.map(r =>
+          '<tr>' +
+            '<td>' + escapeHtml(r.productName) + '</td>' +
+            '<td>' + escapeHtml(r.size) + '</td>' +
+            '<td>' + escapeHtml(r.color) + '</td>' +
+            '<td>' +
+              '<div class="inv-qty-stepper">' +
+                '<button onclick="adjustStock(\'' + r.productId + '\', \'' + r.size.replace(/'/g,"\\'") + '\', \'' + r.color.replace(/'/g,"\\'") + '\', -1)">' + ICONS.minus + '</button>' +
+                '<span class="tabular ' + (r.qty<=LOW_STOCK_THRESHOLD?'low-stock':'') + '">' + r.qty + '</span>' +
+                '<button onclick="adjustStock(\'' + r.productId + '\', \'' + r.size.replace(/'/g,"\\'") + '\', \'' + r.color.replace(/'/g,"\\'") + '\', 1)">' + ICONS.plus + '</button>' +
+              '</div>' +
+              (r.qty<=LOW_STOCK_THRESHOLD ? '<span class="badge badge-warn" style="margin-right:8px;">مخزون منخفض</span>' : '') +
+            '</td>' +
+          '</tr>'
+        ).join('') + '</tbody>' +
+      '</table>' +
+    '</div>' +
+  '</div>';
+}
+async function adjustStock(productId, size, color, delta){
+  const key = variantKey(size, color);
+  const stock = state.stockByProduct[productId] || {};
+  const newQty = Math.max(0, (stock[key]||0) + delta);
+  stock[key] = newQty;
+  state.stockByProduct[productId] = stock;
+  render(); // optimistic UI update
+
+  try{
+    await setDoc(doc(db, 'products', productId, 'private', 'stock'), { qty: stock });
+    // keep the public availability flag for this variant in sync
+    const p = state.products.find(p=>p.id===productId);
+    if(p){
+      const variants = (p.variants||[]).map(v => v.size===size && v.color===color
+        ? { ...v, status: newQty>0 ? 'available' : 'unavailable' } : v);
+      await updateDoc(doc(db, 'products', productId), { variants });
+    }
+  }catch(err){
+    toast('حصل خطأ في تحديث المخزون', 'error');
+  }
+}
+
+/* ================= MODAL ================= */
+function renderModal(){
+  if(!state.modal) return '';
+  if(state.modal.type === 'confirmDelete'){
+    const p = state.products.find(p=>p.id===state.modal.productId);
+    return '<div class="modal-overlay" onclick="closeModal()">' +
+      '<div class="modal-sheet" onclick="event.stopPropagation()">' +
+        '<div class="modal-head"><span class="modal-title">تأكيد الحذف</span><button class="close-btn" onclick="closeModal()">' + ICONS.x + '</button></div>' +
+        '<div class="modal-body stack">' +
+          '<div>هتمسح منتج "' + escapeHtml(p?p.name:'') + '" نهائي. متأكد؟</div>' +
+          '<div class="row">' +
+            '<button class="btn-secondary" style="flex:1;" onclick="closeModal()">إلغاء</button>' +
+            '<button class="btn-primary" style="flex:1;background:var(--accent-dark);" onclick="doDeleteProduct(\'' + state.modal.productId + '\')">' + ICONS.trash + ' حذف نهائي</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+  return '';
+}
+function closeModal(){ state.modal = null; render(); }
+
+/* ================= DATA / AUTH WIRING ================= */
+function loadProducts(){
+  const q = query(collection(db, 'products'));
+  onSnapshot(q, (snap)=>{
+    state.products = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+    state.productsLoaded = true;
+    render();
+  }, ()=>{ state.productsLoaded = true; render(); });
+}
+function subscribeAllOrders(){
+  if(state.ordersUnsub) state.ordersUnsub();
+  const q = query(collection(db, 'orders'), orderBy('createdAt','desc'));
+  state.ordersUnsub = onSnapshot(q, (snap)=>{
+    state.orders = snap.docs.map(d=>{
+      const data = d.data();
+      return { id:d.id, ...data, createdAt: data.createdAt && data.createdAt.toDate ? data.createdAt.toDate().toISOString() : null };
+    });
+    state.ordersLoaded = true;
+    render();
+  }, ()=>{ state.ordersLoaded = true; render(); });
+}
+
+onAuthStateChanged(auth, async (user)=>{
+  state.user = user;
+  state.adminChecked = false;
+  state.isAdmin = false;
+  render();
+  if(user){
+    try{
+      const snap = await getDoc(doc(db, 'admins', user.uid));
+      state.isAdmin = snap.exists();
+    }catch(e){ state.isAdmin = false; }
+    state.adminChecked = true;
+    if(state.isAdmin){
+      subscribeAllOrders();
+    }
+    render();
+  } else {
+    state.orders = [];
+    state.ordersLoaded = false;
+    if(state.ordersUnsub){ state.ordersUnsub(); state.ordersUnsub = null; }
+  }
+});
+
+loadProducts();
+render();
+
+Object.assign(window, {
+  setTab, openProductEditor, closeProductEditor, updateDraftField, updateImageUrl, addImageUrlRow, removeImageUrlRow,
+  addVariantRow, removeVariantRow, updateVariantField, saveProduct, confirmDeleteProduct, doDeleteProduct,
+  setOrderFilter, changeOrderStatus, adjustStock, closeModal,
+  switchAuthMode, submitAuth, doLogout,
+});
+</script>
+</body>
+</html>
